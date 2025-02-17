@@ -454,7 +454,7 @@ def main(args):
     if args.is_static:
         save_path = "../data/0414_hash_static-{}-{}/".format(str(args.days), args.lang)
     else:
-        save_path = "../data/0414_ALL_{}/".format(args.lang)
+        save_path = "./0413_ALL_{}/".format(args.lang)
 
     if not os.path.exists(save_path):
         os.mkdir(save_path)
@@ -473,8 +473,8 @@ def main(args):
             df.drop_duplicates(['tweet_id'], inplace=True, keep='first')
 
     elif args.lang == "English":
-        p_part1 = '../data/English_Twitter/68841_tweets_multiclasses_filtered_0722_part1.npy'
-        p_part2 = '../data/English_Twitter/68841_tweets_multiclasses_filtered_0722_part2.npy'
+        p_part1 = './68841_tweets_multiclasses_filtered_0722_part1.npy'
+        p_part2 = './68841_tweets_multiclasses_filtered_0722_part2.npy'
         df_np_part1 = np.load(p_part1, allow_pickle=True)
         df_np_part2 = np.load(p_part2, allow_pickle=True)
         df_np = np.concatenate((df_np_part1, df_np_part2), axis=0)
@@ -490,7 +490,7 @@ def main(args):
     # append date
     df['date'] = [d.date() for d in df['created_at']]
 
-    f = np.load('../data/features_69612_0709_spacy_lg_zero_multiclasses_filtered_{}.npy'.format(args.lang))
+    f = np.load('./features_69612_0709_spacy_lg_zero_multiclasses_filtered_{}.npy'.format(args.lang))
 
 
     message, data_split, all_graph_mins = construct_incremental_dataset_0922(args, df, save_path, f, False)
@@ -505,7 +505,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--is_static', type=bool, default=False)
-    parser.add_argument('--lang', type=str, default='French')
-    parser.add_argument('--days', type=int, default=2)
+    parser.add_argument('--lang', type=str, default='English')
+    parser.add_argument('--days', type=int, default=7)
     args = parser.parse_args()
     main(args)

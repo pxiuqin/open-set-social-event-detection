@@ -70,7 +70,7 @@ if __name__ == '__main__':
                         help="Log interval")
     # offline or online situation
     parser.add_argument('--is_incremental', default=True, action='store_true')
-    parser.add_argument('--data_path', default='../data/0414_ALL_French',
+    parser.add_argument('--data_path', default='./data/0413_ALL_English',
                         type=str, help="Path of features, labels and edges")
     parser.add_argument('--add_pair', action='store_true', default=True)
 
@@ -80,7 +80,7 @@ if __name__ == '__main__':
     if use_cuda:
         torch.cuda.set_device(args.gpuid)
 
-    embedding_save_path = args.data_path + '/embeddings_' + strftime("%m%d%H%M%S", localtime())
+    embedding_save_path = args.data_path + '/embeddings_qsgnn'
     os.mkdir(embedding_save_path)
     print("embedding_save_path: ", embedding_save_path)
     with open(embedding_save_path + '/args.txt', 'w') as f:
@@ -95,23 +95,20 @@ if __name__ == '__main__':
     # Metrics
     metrics = [AverageNonzeroTripletsMetric()]
 
-    if args.add_pair:
+    if args.is_incremental:
         #model, label_center_emb = initial_train(0, args, data_split, metrics,embedding_save_path, loss_fn, None)
         model = GAT(302, args.hidden_dim, args.out_dim, args.num_heads, args.use_residual)
-        best_model_path = "../data/0413_ALL_English/embeddings_0507074357/block_0/models/best.pt"
-        label_center_emb = torch.load("../data/0413_ALL_English/embeddings_0507074357/block_0/models/center.pth")
-        # best_model_path = "../data/0414_ALL_French/embeddings_0507065144/block_0/models/best.pt"
-        # label_center_emb = torch.load("../data/0414_ALL_French/embeddings_0507065144/block_0/models/center.pth")
+        best_model_path = "./data/0413_ALL_English/embeddings_qsgnn/block_0/models/best.pt"
+        label_center_emb = torch.load("./data/0413_ALL_English/embeddings_qsgnn/block_0/models/center.pth")
         model.load_state_dict(torch.load(best_model_path))
         if args.use_cuda:
             model.cuda()
 
-        if args.is_incremental:
-            for i in range(1, data_split.shape[0]):
-                print("incremental setting")
-                print("enter i ",str(i))
-                # Inference (prediction)
-                _ = continue_train(i, data_split, metrics, embedding_save_path, loss_fn, model, label_center_emb, args)
+        for i in range(1, data_split.shape[0]):
+            print("incremental setting")
+            print("enter i ",str(i))
+            # Inference (prediction)
+            _ = continue_train(i, data_split, metrics, embedding_save_path, loss_fn, model, label_center_emb, args)
 
     else:
         model = initial_train(0, args, data_split, metrics, embedding_save_path, loss_fn, None)

@@ -2,8 +2,21 @@
 
 ## 环境
 
+```shell
 dgl==2.0.0
 torch==2.2.1
+```
+
+另外有一个做文本嵌入的模型需要下载
+
+首先，确保已经安装了spaCy。如果尚未安装，可以使用以下命令进行安装：
+```shell
+pip install -U spacy
+```
+然后，通过pip直接下载安装en_core_web_lg模型：
+```shell
+python -m spacy download en_core_web_lg
+```
 
 ## 数据
 

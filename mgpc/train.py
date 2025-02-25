@@ -374,8 +374,9 @@ def prompt_train(i, data_split, metrics, embedding_save_path, model, label_cente
     if not os.path.isdir(model_path):
         os.mkdir(model_path)
 
-    label_center_emb = torch.FloatTensor(np.array(list(label_center.values()))).cuda() if args.use_cuda else torch.FloatTensor(np.array(list(label_center.values())))
-    
+    # label_center_emb = torch.FloatTensor(np.array(list(label_center.values()))).cuda() if args.use_cuda else torch.FloatTensor(np.array(list(label_center.values())))
+    label_center_emb = torch.tensor(list(label_center.values()), dtype=torch.float).cuda() if args.use_cuda else torch.tensor(list(label_center.values()), dtype=torch.float)
+
     # record the time spent in seconds on each batch of all training/maintaining epochs
     seconds_train_batches = []
     # record the time spent in mins on each epoch

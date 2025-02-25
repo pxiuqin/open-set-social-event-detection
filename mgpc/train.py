@@ -276,19 +276,26 @@ def initial_train(i, args, data_split, metrics, embedding_save_path, model=None)
             message += '\t{}: {:.4f}'.format(metric.name(), metric.value())
         mins_spent = (time.time() - start_epoch) / 60
         message += '\nThis epoch took {:.2f} mins'.format(mins_spent)
-        message += '\n'
-        print(message)
-        with open(save_path_i + '/log.txt', 'a') as f:
-            f.write(message)
+        # message += '\n'
+        # print(message)
+        # with open(save_path_i + '/log.txt', 'a') as f:
+        #     f.write(message)
         mins_train_epochs.append(mins_spent)
 
         extract_features, extract_labels = extract_embeddings(g, model, len(labels), args)
         # np.save(save_path_i + '/features_' + str(epoch) + '.npy', extract_features)
         # np.save(save_path_i + '/labels_' + str(epoch) + '.npy', extract_labels)
 
+        start_eval = time.time()
         # 这里的值是NMI或者AMI
         validation_value = evaluate(extract_features, extract_labels, validation_indices, epoch, num_isolated_nodes,
                                   save_path_i, args, True)
+        mins_eval_spent = (time.time() - start_eval) / 60
+        message += '\nThis epoch eval took {:.2f} mins'.format(mins_eval_spent)
+        message += '\n'
+        print(message)
+        with open(save_path_i + '/log.txt', 'a') as f:
+            f.write(message)
         all_vali_value.append(validation_value)
 
         # Early stop
@@ -471,8 +478,8 @@ def prompt_train(i, data_split, metrics, embedding_save_path, model, label_cente
             message += '\t{}: {:.4f}'.format(metric.name(), metric.value())
         mins_spent = (time.time() - start_epoch) / 60
         message += '\nThis epoch took {:.2f} mins'.format(mins_spent)
-        message += '\n'
-        print(message)
+        # message += '\n'
+        # print(message)
         # with open(save_path_i + '/log.txt', 'a') as f:
         #     f.write(message)
         mins_train_epochs.append(mins_spent)
@@ -483,9 +490,16 @@ def prompt_train(i, data_split, metrics, embedding_save_path, model, label_cente
         np.save(f'{model_path}/features_{epoch}.npy', extract_features)
         np.save(f'{model_path}/labels_{epoch}.npy', extract_labels)
 
+        start_eval = time.time()
         # save_embeddings(extract_nids, extract_features, extract_labels, extract_train_tags, save_path_i, epoch)
         test_value = evaluate(extract_features, extract_labels, test_indices, epoch, num_isolated_nodes,
                                 save_path_i, args, False)
+        mins_eval_spent = (time.time() - start_eval) / 60
+        message += '\nThis epoch eval took {:.2f} mins'.format(mins_eval_spent)
+        message += '\n'
+        print(message)
+        with open(save_path_i + '/log.txt', 'a') as f:
+            f.write(message)
 
     # p = model_path + '/finetune.pt'
     # torch.save(model.state_dict(), p)

@@ -124,7 +124,7 @@ def extract_embeddings(g, model, num_all_samples, args):
         if args.use_cuda:
             indices = indices.cuda()
         sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
-        dataloader = dgl.dataloading.NodeDataLoader(
+        dataloader = dgl.dataloading.DataLoader(
             g, graph_sampler=sampler,
             batch_size=num_all_samples,
             indices = indices,
@@ -154,7 +154,7 @@ def initial_train(i, args, data_split, metrics,embedding_save_path, loss_fn, mod
         model.cuda()
 
     # Optimizer
-    optimizer = optim.Adam([{"params":model.parameters()},lr=args.lr, weight_decay=1e-4)
+    optimizer = optim.Adam([{"params":model.parameters()}],lr=args.lr, weight_decay=1e-4)
 
     # Start training
     message = "\n------------ Start initial training ------------\n"
@@ -187,8 +187,8 @@ def initial_train(i, args, data_split, metrics,embedding_save_path, loss_fn, mod
             label_center[l] = l_cen
 
 
-        sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
-        dataloader = dgl.dataloading.NodeDataLoader(
+        sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)  # 两层图结构
+        dataloader = dgl.dataloading.DataLoader(
             g, train_indices, sampler,
             batch_size=args.batch_size,
             shuffle=True,
@@ -257,18 +257,27 @@ def initial_train(i, args, data_split, metrics,embedding_save_path, loss_fn, mod
             message += '\t{}: {:.4f}'.format(metric.name(), metric.value())
         mins_spent = (time.time() - start_epoch) / 60
         message += '\nThis epoch took {:.2f} mins'.format(mins_spent)
-        message += '\n'
-        print(message)
-        with open(save_path_i + '/log.txt', 'a') as f:
-            f.write(message)
+        # message += '\n'
+        # print(message)
+        # with open(save_path_i + '/log.txt', 'a') as f:
+        #     f.write(message)
         mins_train_epochs.append(mins_spent)
 
         extract_features, extract_labels = extract_embeddings(g, model, len(labels), args)
         np.save(save_path_i + '/features_' + str(epoch) + '.npy', extract_features)
         np.save(save_path_i + '/labels_' + str(epoch) + '.npy', extract_labels)
 
+        start_eval = time.time()
         validation_value = evaluate(extract_features, extract_labels, validation_indices, epoch, num_isolated_nodes,
                                   save_path_i, args, True)
+        
+        mins_eval_spent = (time.time() - start_eval) / 60
+        message += '\nThis epoch eval took {:.2f} mins'.format(mins_eval_spent)
+        message += '\n'
+        print(message)
+        with open(save_path_i + '/log.txt', 'a') as f:
+            f.write(message)
+
         all_vali_value.append(validation_value)
 
         # Early stop
@@ -359,7 +368,7 @@ def continue_train(i, data_split, metrics, embedding_save_path, loss_fn, model, 
                 metric.reset()
 
             sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
-            dataloader = dgl.dataloading.NodeDataLoader(
+            dataloader = dgl.dataloading.DataLoader(
                 g, test_indices, sampler,
                 batch_size=args.batch_size,
                 shuffle=True,
@@ -429,16 +438,23 @@ def continue_train(i, data_split, metrics, embedding_save_path, loss_fn, model, 
             message = 'Epoch: {}/{}. Average loss: {:.4f}'.format(epoch + 1, args.finetune_epochs, total_loss)
             mins_spent = (time.time() - start_epoch) / 60
             message += '\nThis epoch took {:.2f} mins'.format(mins_spent)
+            # message += '\n'
+            # print(message)
+            # with open(save_path_i + '/log.txt', 'a') as f:
+            #     f.write(message)
+            mins_train_epochs.append(mins_spent)
+
+            extract_features, extract_labels = extract_embeddings(g, model, len(labels), args)
+            start_eval = time.time()
+            # save_embeddings(extract_nids, extract_features, extract_labels, extract_train_tags, save_path_i, epoch)
+            test_value = evaluate(extract_features, extract_labels, test_indices, epoch, num_isolated_nodes,
+                                  save_path_i, args, True)
+            mins_eval_spent = (time.time() - start_eval) / 60
+            message += '\nThis epoch eval took {:.2f} mins'.format(mins_eval_spent)
             message += '\n'
             print(message)
             with open(save_path_i + '/log.txt', 'a') as f:
                 f.write(message)
-            mins_train_epochs.append(mins_spent)
-
-            extract_features, extract_labels = extract_embeddings(g, model, len(labels), args)
-            # save_embeddings(extract_nids, extract_features, extract_labels, extract_train_tags, save_path_i, epoch)
-            test_value = evaluate(extract_features, extract_labels, test_indices, epoch, num_isolated_nodes,
-                                  save_path_i, args, True)
 
 
 
@@ -458,4 +474,3 @@ def continue_train(i, data_split, metrics, embedding_save_path, loss_fn, model, 
         print('Saved seconds_train_batches.')
 
         return model
-

@@ -23,7 +23,8 @@ python -m spacy download en_core_web_lg
 ### 数据下载
 
 * 1、English数据集下载地址：https://github.com/RingBDStack/KPGNN/tree/main/datasets/Twitter
-* 2、下载到 data 目录下
+* 2、French数据集下载地址：https://github.com/RingBDStack/CLKD/blob/main/datasets/French_Twitter/All_French.npy
+* 3、下载到 data 目录下
 
 ### 数据准备
 

@@ -10,6 +10,19 @@ import os
 import json
 import numpy as np
 from model import EDNN, GAT, simNN
+import random
+
+seed = 123
+torch.manual_seed(seed)
+torch.cuda.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
+torch.backends.cudnn.benchmark = True
+torch.backends.cudnn.deterministic = True
+# Set a fixed value for the hash seed
+os.environ["PYTHONHASHSEED"] = str(seed)
+np.random.seed(seed)
+random.seed(seed)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # Hyper parameters

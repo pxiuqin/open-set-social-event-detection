@@ -460,7 +460,7 @@ def main(args):
         os.mkdir(save_path)
 
     if args.lang == "French" or args.lang == "Arabic":
-        df_np = np.load('../data/{}_Twitter/All_{}.npy'.format(args.lang, args.lang), allow_pickle=True)
+        df_np = np.load('../data/All_{}.npy'.format(args.lang, args.lang), allow_pickle=True)
         df = pd.DataFrame(data=df_np, columns=["tweet_id", "user_id", "text", "time", "event_id", "user_mentions",
                                                "hashtags", "urls", "words", "created_at", "filtered_words", "entities",
                                                "sampled_words"])
